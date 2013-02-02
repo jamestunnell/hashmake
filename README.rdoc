@@ -1,0 +1,27 @@
+= hashmake
+
+* {Homepage}[https://rubygems.org/gems/hashmake]
+* {Documentation}[http://rubydoc.info/gems/hashmake/frames]
+* {Email}[mailto:jamestunnell at lavabit.com]
+
+== Description
+
+Make hash-based object initialization easy! Provides hash_make method that can consider parameter name, type, default value, validation, and requiredd/not, according to the specification provided. Also, by default assigns by default to instance variable of same name as parameter.
+
+== Features
+
+== Examples
+
+  require 'hashmake'
+
+== Requirements
+
+== Install
+
+  $ gem install hashmake
+
+== Copyright
+
+Copyright (c) 2013 James Tunnell
+
+See LICENSE.txt for details.
