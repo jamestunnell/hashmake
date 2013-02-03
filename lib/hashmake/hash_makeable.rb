@@ -1,4 +1,4 @@
-module HashMake
+module Hashmake
 module HashMakeable
   
   # Use the included hook to also extend the including class with HashMake
@@ -14,7 +14,6 @@ module HashMakeable
     raise ArgumentError, "hashed_args is not a Hash" unless hashed_args.is_a?(Hash)
 
     arg_specs.each do |arg_spec|
-      
       key = arg_spec.key
       if hashed_args.has_key?(key)
         val = hashed_args[key]
@@ -31,12 +30,12 @@ module HashMakeable
       end
       
       if arg_spec.array
-        raise "val #{val} is not an array" unless val.is_a?(Array)
+        raise ArgumentError, "val #{val} is not an array" unless val.is_a?(Array)
         val.each do |item|
-          raise "array item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
+          raise ArgumentError, "array item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
         end
       else
-        raise "val #{val} is not a #{arg_spec.type}" unless val.is_a?(arg_spec.type)
+        raise ArgumentError, "val #{val} is not a #{arg_spec.type}" unless val.is_a?(arg_spec.type)
       end
       
       if assign_args

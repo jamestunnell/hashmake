@@ -1,4 +1,4 @@
-module HashMake
+module Hashmake
 class HashedArg
   
   DEFAULT_ARGS = {

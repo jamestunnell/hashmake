@@ -1,4 +1,4 @@
 require 'rspec'
-require 'hashmake/version'
+require 'hashmake'
 
 include Hashmake
