@@ -44,6 +44,14 @@ describe Hashmake::HashMakeable do
         lambda { MyTestClass.new( :reqd_string => 1.1 ) }.should raise_error(ArgumentError)
         lambda { MyTestClass.new( :reqd_string => "okedoke", :not_reqd_float => "" ) }.should raise_error(ArgumentError)
       end
+      
+      it 'should set instance variables to correspond with each hashed arg' do
+        a = MyTestClass.new :reqd_string => "goodstuff", :not_reqd_float => 0.321
+        a.instance_variables.include?("@#{:reqd_string.to_s}".to_sym).should be_true
+        a.instance_variables.include?("@#{:not_reqd_float.to_s}".to_sym).should be_true
+        a.reqd_string.should eq("goodstuff")
+        a.not_reqd_float.should eq(0.321)
+      end
     end
   end  
 end
