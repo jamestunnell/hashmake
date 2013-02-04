@@ -6,7 +6,11 @@
 
 == Description
 
-Make hash-based object initialization easy! Provides hash_make method that can consider parameter name, type, default value, validation, and requiredd/not, according to the specification provided. Also, by default assigns by default to instance variable of same name as parameter.
+Make hash-based object initialization easy!
+
+Provides hash_make method that can consider parameter name, type, default value, validation, and requiredd/not, according to the specification provided.
+
+Also, by default assigns to instance variable of same name as parameter.
 
 == Features
 

@@ -7,9 +7,20 @@ module HashMakeable
     base.extend(ClassMethods)
   end
 
+  # Process a hash that contains 'hashed args'. Each hashed arg is intended to
+  # be used in initializing an object instance. 
+  #
+  # @param [Enumerable] arg_specs An enumerable of ArgSpec objects. Each object
+  #                               details an arg key that might be expected in the
+  #                               args hash.
+  # @param [Hash] hashed_args A hash that should contain at least all the required
+  #                           keys and valid values, according to the arg_specs passed in.
+  #                           Nonrequired keys can be given as well, but if they are
+  #                           not then a default value is assigned (again, according to
+  #                           arg_specs passed in).
   def hash_make arg_specs, hashed_args, assign_args = true
     arg_specs.each do |arg_spec|
-      raise ArgumentError, "arg_specs item #{arg_spec} is not a HashedArg" unless arg_spec.is_a?(HashedArg)
+      raise ArgumentError, "arg_specs item #{arg_spec} is not a ArgSpec" unless arg_spec.is_a?(ArgSpec)
     end
     raise ArgumentError, "hashed_args is not a Hash" unless hashed_args.is_a?(Hash)
 
@@ -45,8 +56,10 @@ module HashMakeable
     end
   end
 
+  # Contains class methods to be added to a class that includes the
+  # HashMakeable module.
   module ClassMethods
-    # none right now, maybe later
+    
   end
 
 end

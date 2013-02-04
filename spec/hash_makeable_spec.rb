@@ -5,8 +5,8 @@ describe Hashmake::HashMakeable do
     include HashMakeable
     
     HASHED_ARG_SPECS = [
-      HashedArg.new(:reqd => true, :key => :reqd_string, :type => String, :validator => ->(a){ a.length < 10 }),
-      HashedArg.new(:reqd => false, :key => :not_reqd_float, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
+      ArgSpec.new(:reqd => true, :key => :reqd_string, :type => String, :validator => ->(a){ a.length < 10 }),
+      ArgSpec.new(:reqd => false, :key => :not_reqd_float, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
     ]
     
     attr_reader :reqd_string, :not_reqd_float
