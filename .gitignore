@@ -1,18 +1,8 @@
 Gemfile.lock
 
-*.gem
-*.rbc
-.bundle
-.config
-coverage
-InstalledFiles
-lib/bundler/man
-pkg
-rdoc
-spec/reports
-test/tmp
-test/version_tmp
-tmp
+# Gem artifacts
+pkg/
+vendor/cache/*.gem
 
 # YARD artifacts
 .yardoc
