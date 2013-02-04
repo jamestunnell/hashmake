@@ -1,4 +1,9 @@
 module Hashmake
+
+# This module should be included for any class that wants to be 'hash-makeable',
+# which means that a new object instance expects all its arguments to come in a
+# single Hash. See the hash_make method in this module and the ArgSpec class for
+# more details.
 module HashMakeable
   
   # Use the included hook to also extend the including class with HashMake
