@@ -8,15 +8,33 @@
 
 Make hash-based object initialization easy!
 
-Provides hash_make method that can consider parameter name, type, default value, validation, and requiredd/not, according to the specification provided.
-
-Also, by default assigns to instance variable of same name as parameter.
+Provides hash_make method that can consider parameter name, type, default value, validation, requiredd/not, and container type (none/array/hash) according to the specification provided. By default it the value given with the arg key to to an instance variable of same name as parameter.
 
 == Features
 
 == Examples
 
   require 'hashmake'
+  
+  class MyClass
+    include Hashmake::HashMakeable
+    
+    ARG_SPECS = [
+      ArgSpec.new(:key => :x, :reqd => true, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
+      ArgSpec.new(:key => :y, :reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }, :default => 0.0),
+    ]
+    
+    attr_reader :x, :y
+    
+    def initialize hashed_args
+      hash_make(ARG_SPECS, hashed_args)
+    end
+  end
+  
+  a = MyClass.new :x => 0.5 # a.x => 0.5, a.y => 0.0
+  a = MyClass.new :x => 0.5, :y => 0.2 # a.x => 0.5, a.y => 0.2
+  a = MyClass.new # raise ArgumentError because :x is reqd and not given
+  a = MyClass.new :y => 0.5 # raise ArgumentError because :x is reqd and not given
 
 == Requirements
 

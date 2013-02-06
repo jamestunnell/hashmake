@@ -7,9 +7,11 @@ describe Hashmake::HashMakeable do
     HASHED_ARG_SPECS = [
       ArgSpec.new(:reqd => true, :key => :reqd_string, :type => String, :validator => ->(a){ a.length < 10 }),
       ArgSpec.new(:reqd => false, :key => :not_reqd_float, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
+      ArgSpec.new(:reqd => false, :key => :not_reqd_array_of_float, :type => Float, :container => ArgSpec::CONTAINER_ARRAY, :default => ->(){Array.new}, :validator => ->(a){ a.between?(0.0,1.0) }),
+      ArgSpec.new(:reqd => false, :key => :not_reqd_hash_of_float, :type => Float, :container => ArgSpec::CONTAINER_HASH, :default => ->(){Hash.new}, :validator => ->(a){ a.between?(0.0,1.0) }),
     ]
     
-    attr_reader :reqd_string, :not_reqd_float
+    attr_reader :reqd_string, :not_reqd_float, :not_reqd_array_of_float, :not_reqd_hash_of_float
     
     def initialize hashed_args = {}
       hash_make MyTestClass::HASHED_ARG_SPECS, hashed_args
@@ -53,5 +55,54 @@ describe Hashmake::HashMakeable do
         a.not_reqd_float.should eq(0.321)
       end
     end
+    
+    context 'array container arg' do
+      it 'should be empty by default' do
+        a = MyTestClass.new :reqd_string => ""
+        a.not_reqd_array_of_float.should be_empty
+      end
+
+      it 'should assign array if it contains valid values of correct type' do
+        a = MyTestClass.new :reqd_string => "", :not_reqd_array_of_float => [ 0.5, 0.75 ]
+        a.not_reqd_array_of_float.should eq([ 0.5, 0.75 ])
+      end
+
+      it 'should raise ArgumentError if it contains invalid values of correct type' do
+        lambda do
+          a = MyTestClass.new :reqd_string => "", :not_reqd_array_of_float => [ -0.5, 2.5 ]
+        end.should raise_error(ArgumentError)
+      end
+
+      it 'should raise ArgumentError if it contains valid values of incorrect type' do
+        lambda do
+          a = MyTestClass.new :reqd_string => "", :not_reqd_array_of_float => [ "", 2.5 ]
+        end.should raise_error(ArgumentError)
+      end
+    end
+
+    context 'hash container arg' do
+      it 'should be empty by default' do
+        a = MyTestClass.new :reqd_string => ""
+        a.not_reqd_hash_of_float.should be_empty
+      end
+
+      it 'should assign array if it contains valid values of correct type' do
+        a = MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { :a => 0.5, :b => 0.75 }
+        a.not_reqd_hash_of_float.should eq({ :a => 0.5, :b => 0.75 })
+      end
+
+      it 'should raise ArgumentError if it contains invalid values of correct type' do
+        lambda do
+          a = MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { :a => -0.5, :b => 1.75 }
+        end.should raise_error(ArgumentError)
+      end
+
+      it 'should raise ArgumentError if it contains valid values of incorrect type' do
+        lambda do
+          a = MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { :a => "", :b => 0.75 }
+        end.should raise_error(ArgumentError)
+      end
+    end
+
   end  
 end

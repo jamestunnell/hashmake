@@ -17,3 +17,7 @@ Removed README.md so YARD could run without the redcarpet gem.
 
 For the ArgSpec class, change :array key to :container, which can be set to any value included in ArgSpec::CONTAINERS.
 In hash_make, add support for Hash containers which contain objects of type :type. Suppor for Array container is still in place.
+
+=== 0.1.4 / 2013-02-06
+
+Add tests to verify array and hash container support.
