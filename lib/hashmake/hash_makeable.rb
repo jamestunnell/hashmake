@@ -45,13 +45,21 @@ module HashMakeable
         end
       end
       
-      if arg_spec.array
+      case arg_spec.container
+      when ArgSpec::CONTAINER_ARRAY
         raise ArgumentError, "val #{val} is not an array" unless val.is_a?(Array)
         val.each do |item|
           raise ArgumentError, "array item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
         end
-      else
+      when ArgSpec::CONTAINER_HASH
+        raise ArgumentError, "val #{val} is not a hash" unless val.is_a?(Hash)
+        val.values.each do |item|
+          raise ArgumentError, "hash item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
+        end
+      when ArgSpec::CONTAINER_NONE
         raise ArgumentError, "val #{val} is not a #{arg_spec.type}" unless val.is_a?(arg_spec.type)
+      else
+        raise ArgumentError, "arg_spec.container #{arg_spec.container} is not valid"
       end
       
       if assign_args

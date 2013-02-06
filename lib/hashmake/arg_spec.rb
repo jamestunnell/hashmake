@@ -6,21 +6,37 @@ module Hashmake
 # @author James Tunnell
 # 
 class ArgSpec
-  
+
+  # Used to specify that an arg key is mapped to to a regular value of type
+  # :type (rather than a container which contains values of type :type).
+  CONTAINER_NONE = :containerNone
+  # Used to specify that an arg key is mapped to an Array that contains values
+  # of type :type.
+  CONTAINER_ARRAY = :containerArray
+  # Used to specify that an arg key is mapped to a Hash that contains values
+  # of type :type.
+  CONTAINER_HASH = :containerHash
+  # The valid container types. CONTAINER_NONE indicates no container is expected,
+  # just a plain object of type given by :type.
+  CONTAINERS = [ CONTAINER_NONE, CONTAINER_ARRAY, CONTAINER_HASH ]
+    
   # Defines default key/value pairs to use in initializing an instance.
+  # The :reqd key is set to true by default.
+  # The :validator key is set to a Proc that always returns true.
+  # The :container key is set to CONTAINER_NONE.
   DEFAULT_ARGS = {
     :reqd => true,
     :validator => ->(a){true},
-    :array => false,
+    :container => CONTAINER_NONE,
   }
   
-  attr_reader :key, :type, :validator, :reqd, :default, :array
+  attr_reader :key, :type, :validator, :reqd, :default, :container
   
   # A new instance of ArgSpec. 
   # 
   # @param [Hash] hashed_args Hash to use in initializing an instance. Required
   #                           keys are :key and :type. Optional keys are :reqd,
-  #                           :validator, :array, and :default.
+  #                           :validator, :container, and :default.
   #                           :key => the key used to identify a hashed arg.
   #                           :type => the type of object expected to be paired
   #                                    with the key.
@@ -34,9 +50,10 @@ class ArgSpec
   #                                       expecting it to produce the default.
   #                           :validator => a Proc used to check the validity of
   #                                         whatever value is paired with an arg key.
-  #                           :array => indicates the arg key will be paired with
-  #                                     an array containing objects of the type
-  #                                     specified by :type.
+  #                           :container => indicates whether the arg key will be paired
+  #                                     with a container (array or hash) which contains
+  #                                     objects of the type specified by :type. Valid values
+  #                                     for this are given by ArgSpec::CONTAINERS.
   def initialize hashed_args
     new_args = DEFAULT_ARGS.merge(hashed_args)
     
@@ -46,7 +63,9 @@ class ArgSpec
     
     @validator = new_args[:validator]
     @reqd = new_args[:reqd]
-    @array = new_args[:array]
+    
+    @container = new_args[:container]
+    raise ArgumentError, "CONTAINERS does not include container #{@container}" unless CONTAINERS.include?(@container)
     
     unless @reqd
       msg = "if hashed arg is not required, a default value or value generator (proc) must be defined via :default key"
