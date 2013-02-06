@@ -12,3 +12,8 @@ Changed HashedArg to ArgSpec. Added documentation.
 
 Added documentation comment for Hashmake::HashMakeable module.
 Removed README.md so YARD could run without the redcarpet gem.
+
+=== 0.1.3 / 2013-02-06
+
+For the ArgSpec class, change :array key to :container, which can be set to any value included in ArgSpec::CONTAINERS.
+In hash_make, add support for Hash containers which contain objects of type :type. Suppor for Array container is still in place.
