@@ -7,18 +7,9 @@ module Hashmake
 # 
 class ArgSpec
 
-  # Used to specify that an arg key is mapped to to a regular value of type
-  # :type (rather than a container which contains values of type :type).
-  CONTAINER_NONE = :containerNone
-  # Used to specify that an arg key is mapped to an Array that contains values
-  # of type :type.
-  CONTAINER_ARRAY = :containerArray
-  # Used to specify that an arg key is mapped to a Hash that contains values
-  # of type :type.
-  CONTAINER_HASH = :containerHash
-  # The valid container types. CONTAINER_NONE indicates no container is expected,
+  # The valid container types. If nil, indicates no container is expected,
   # just a plain object of type given by :type.
-  CONTAINERS = [ CONTAINER_NONE, CONTAINER_ARRAY, CONTAINER_HASH ]
+  CONTAINERS = [ nil, Hash, Array ]
     
   # Defines default key/value pairs to use in initializing an instance.
   # The :reqd key is set to true by default.
@@ -27,7 +18,8 @@ class ArgSpec
   DEFAULT_ARGS = {
     :reqd => true,
     :validator => ->(a){true},
-    :container => CONTAINER_NONE,
+    :container => nil,
+    :type => Object,
   }
   
   attr_reader :key, :type, :validator, :reqd, :default, :container

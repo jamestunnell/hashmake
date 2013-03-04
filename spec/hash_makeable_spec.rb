@@ -1,20 +1,21 @@
+require 'pry'
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Hashmake::HashMakeable do
   class MyTestClass
     include HashMakeable
     
-    HASHED_ARG_SPECS = [
-      ArgSpec.new(:reqd => true, :key => :reqd_string, :type => String, :validator => ->(a){ a.length < 10 }),
-      ArgSpec.new(:reqd => false, :key => :not_reqd_float, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
-      ArgSpec.new(:reqd => false, :key => :not_reqd_array_of_float, :type => Float, :container => ArgSpec::CONTAINER_ARRAY, :default => ->(){Array.new}, :validator => ->(a){ a.between?(0.0,1.0) }),
-      ArgSpec.new(:reqd => false, :key => :not_reqd_hash_of_float, :type => Float, :container => ArgSpec::CONTAINER_HASH, :default => ->(){Hash.new}, :validator => ->(a){ a.between?(0.0,1.0) }),
-    ]
+    ARG_SPECS = {
+      :reqd_string => arg_spec(:reqd => true, :type => String, :validator => ->(a){ a.length < 10 }),
+      :not_reqd_float => arg_spec(:reqd => false, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
+      :not_reqd_array_of_float => arg_spec_array(:reqd => false, :type => Float,  :validator => ->(a){ a.between?(0.0,1.0) }),
+      :not_reqd_hash_of_float => arg_spec_hash(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
+    }
     
     attr_reader :reqd_string, :not_reqd_float, :not_reqd_array_of_float, :not_reqd_hash_of_float
     
     def initialize hashed_args = {}
-      hash_make MyTestClass::HASHED_ARG_SPECS, hashed_args
+      hash_make ARG_SPECS, hashed_args
     end
   end
   
