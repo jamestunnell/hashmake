@@ -38,7 +38,7 @@ module HashMakeable
       if hashed_args.has_key?(key)
         val = hashed_args[key]
 
-        if hash_makeable?(arg_spec.type)
+        if Hashmake::hash_makeable?(arg_spec.type)
           # If the val is not of the right type, but is a Hash, attempt to
           # make an object of the right type if it is hash-makeable
           if arg_spec.container == Array && val.is_a?(Array)
