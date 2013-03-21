@@ -32,9 +32,10 @@ describe Hashmake::HashMakeable do
       :not_reqd_array_of_float => arg_spec_array(:reqd => false, :type => Float,  :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_hash_of_float => arg_spec_hash(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
       :also_hash_makeable => arg_spec(:reqd => false, :type => AlsoHashMakeable, :default => ->(){ AlsoHashMakeable.new }),
+      :ary_of_also_hash_makeables => arg_spec_array(:reqd => false, :type => AlsoHashMakeable)
     }
     
-    attr_accessor :not_reqd_float
+    attr_accessor :not_reqd_float, :ary_of_also_hash_makeables
     attr_reader :reqd_string, :not_reqd_array_of_float, :not_reqd_hash_of_float, :also_hash_makeable
     
     def initialize hashed_args = {}
@@ -171,6 +172,20 @@ describe Hashmake::HashMakeable do
       hash[:also_hash_makeable].should be_a Hash
       hash[:also_hash_makeable].should include(:a_number)
       hash[:also_hash_makeable][:a_number].should eq(2.0)
+    end
+    
+    it "should turn an array of hash-makeable objects into an array of Hash objects" do
+      @obj.ary_of_also_hash_makeables = [
+        AlsoHashMakeable.new(:a_number => 1),
+        AlsoHashMakeable.new(:a_number => 2),
+        AlsoHashMakeable.new(:a_number => 3),
+      ]
+      obj2 = MyTestClass.new @obj.make_hash
+      
+      obj2.ary_of_also_hash_makeables.count.should be(3)
+      obj2.ary_of_also_hash_makeables[0].a_number.should eq(1)
+      obj2.ary_of_also_hash_makeables[1].a_number.should eq(2)
+      obj2.ary_of_also_hash_makeables[2].a_number.should eq(3)
     end
   end
 end

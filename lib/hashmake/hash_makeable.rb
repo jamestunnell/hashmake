@@ -147,17 +147,37 @@ module HashMakeable
     end
 
     hash = {}
-    
+
     arg_specs.each do |key, arg_spec|
       sym = "@#{key}".to_sym
       raise ArgumentError, "current obj #{self} does not include instance variable #{sym}" if !self.instance_variables.include?(sym)
       val = self.instance_variable_get(sym)
       
-      if Hashmake::hash_makeable?(val.class)
+      if val.is_a?(Array)
+        ary = val
+        val = []
+        ary.each do |item|
+          if Hashmake::hash_makeable? item.class
+            val << item.make_hash
+          else
+            val << item
+          end
+        end
+      elsif val.is_a?(Hash)
+        hsh = val
+        val = {}
+        hsh.each do |hsh_key,item|
+          if Hashmake::hash_makeable? item.class
+            val[hsh_key] = item.make_hash
+          else
+            val[hsh_key] = item
+          end
+        end
+      elsif Hashmake::hash_makeable?(val.class)
         val = val.make_hash
       end
       
-      if arg_spec.reqd || (val != arg_spec.default)
+      if arg_spec.reqd
         hash[key] = val
       elsif arg_spec.default.is_a?(Proc) && val != arg_spec.default.call
         hash[key] = val
