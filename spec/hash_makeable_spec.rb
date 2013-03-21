@@ -2,6 +2,20 @@ require 'pry'
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Hashmake::HashMakeable do
+  class AlsoHashMakeable
+    include HashMakeable
+    
+    ARG_SPECS = {
+      :a_number => arg_spec(:reqd => false, :type => Numeric, :default => 1.0)
+    }
+    
+    attr_reader :a_number
+    
+    def initialize args = {}
+      hash_make ARG_SPECS, args
+    end
+  end
+  
   class MyTestClass
     include HashMakeable
     
@@ -10,9 +24,10 @@ describe Hashmake::HashMakeable do
       :not_reqd_float => arg_spec(:reqd => false, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_array_of_float => arg_spec_array(:reqd => false, :type => Float,  :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_hash_of_float => arg_spec_hash(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
+      :also_hash_makeable => arg_spec(:reqd => false, :type => AlsoHashMakeable, :default => ->(){ AlsoHashMakeable.new }),
     }
     
-    attr_reader :reqd_string, :not_reqd_float, :not_reqd_array_of_float, :not_reqd_hash_of_float
+    attr_reader :reqd_string, :not_reqd_float, :not_reqd_array_of_float, :not_reqd_hash_of_float, :also_hash_makeable
     
     def initialize hashed_args = {}
       hash_make ARG_SPECS, hashed_args
@@ -102,6 +117,14 @@ describe Hashmake::HashMakeable do
         lambda do
           a = MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { :a => "", :b => 0.75 }
         end.should raise_error(ArgumentError)
+      end
+    end
+    
+    context 'hash-makeable arg' do
+      it 'should construct the hash-makeable arg from just a Hash' do
+        a_number = 5
+        a = MyTestClass.new(:reqd_string => "ok", :also_hash_makeable => { :a_number => a_number })
+        a.also_hash_makeable.a_number.should eq(a_number)
       end
     end
 

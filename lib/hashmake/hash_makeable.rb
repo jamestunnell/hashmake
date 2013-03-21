@@ -1,5 +1,10 @@
 module Hashmake
 
+# Determine if a class includes the HashMakeable module.
+def hash_makeable? klass
+  klass.included_modules.include?(HashMakeable)
+end
+
 # This module should be included for any class that wants to be 'hash-makeable',
 # which means that a new object instance expects all its arguments to come in a
 # single Hash. See the hash_make method in this module and the ArgSpec class for
@@ -32,6 +37,30 @@ module HashMakeable
     arg_specs.each do |key, arg_spec|
       if hashed_args.has_key?(key)
         val = hashed_args[key]
+
+        if hash_makeable?(arg_spec.type)
+          # If the val is not of the right type, but is a Hash, attempt to
+          # make an object of the right type if it is hash-makeable
+          if arg_spec.container == Array && val.is_a?(Array)
+            val.each_index do |i|
+              item = val[i]
+              if !item.is_a?(arg_spec.type) && item.is_a?(Hash)
+                val[i] = arg_spec.type.new item
+              end
+            end
+          elsif arg_spec.container == Hash && val.is_a?(Hash)
+            val.each_key do |item_key|
+              item = val[item_key]
+              if !item.is_a?(arg_spec.type) && item.is_a?(Hash)
+                val[item_key] = arg_spec.type.new item
+              end
+            end
+          else
+            if !val.is_a?(arg_spec.type) && val.is_a?(Hash)
+              val = arg_spec.type.new val
+            end
+          end
+        end
       else
         if arg_spec.reqd
           raise ArgumentError, "hashed_args does not have required key #{key}"
