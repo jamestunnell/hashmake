@@ -1,7 +1,7 @@
 module Hashmake
 
 # Determine if a class includes the HashMakeable module.
-def hash_makeable? klass
+def self.hash_makeable? klass
   klass.included_modules.include?(HashMakeable)
 end
 
@@ -102,7 +102,73 @@ module HashMakeable
     
     return true
   end
+  
+  # Look in the current class for a constant that is a Hash containing (only)
+  # ArgSpec objects. Returns the first constant matching this criteria, or nil
+  # if none was found.
+  def find_arg_specs
+    self.class.constants.each do |constant|
+      val = self.class.const_get(constant)
+      if val.is_a? Hash
+        all_arg_specs = true
+        val.each do |key,value|
+          unless value.is_a? ArgSpec
+            all_arg_specs = false
+            break
+          end
+        end
+        
+        if all_arg_specs
+          return val
+        end
+      end
+    end
+    
+    return nil
+  end
 
+  # Produce a hash that contains 'hashed args'. Each hashed arg is intended to
+  # be used in initializing an object instance. 
+  #
+  # @param [Enumerable] arg_specs An enumerable of ArgSpec objects. Each one
+  #                               details an arg key that might be expected in the
+  #                               args hash. This param is nil by default. If the param
+  #                               is nil, this method will attempt to locate arg specs
+  #                               using find_arg_specs.
+  #                               
+  def make_hash arg_specs = nil
+    if arg_specs.nil?
+      arg_specs = self.find_arg_specs
+      raise "No arg specs given, and no class constant that is a Hash containing only ArgSpec objects was found" if arg_specs.nil?
+    end
+    
+    arg_specs.each do |key, arg_spec|
+      raise ArgumentError, "arg_specs item #{arg_spec} is not a ArgSpec" unless arg_spec.is_a?(ArgSpec)
+    end
+
+    hash = {}
+    
+    arg_specs.each do |key, arg_spec|
+      sym = "@#{key}".to_sym
+      raise ArgumentError, "current obj #{self} does not include instance variable #{sym}" if !self.instance_variables.include?(sym)
+      val = self.instance_variable_get(sym)
+      
+      if Hashmake::hash_makeable?(val.class)
+        val = val.make_hash
+      end
+      
+      if arg_spec.reqd || (val != arg_spec.default)
+        hash[key] = val
+      elsif arg_spec.default.is_a?(Proc) && val != arg_spec.default.call
+        hash[key] = val
+      elsif val != arg_spec.default
+        hash[key] = val
+      end
+    end    
+    
+    return hash
+  end
+  
   # Contains class methods to be added to a class that includes the
   # HashMakeable module.
   module ClassMethods

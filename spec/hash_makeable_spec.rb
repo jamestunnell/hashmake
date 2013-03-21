@@ -3,31 +3,39 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Hashmake::HashMakeable do
   class AlsoHashMakeable
+    include Comparable
     include HashMakeable
     
     ARG_SPECS = {
       :a_number => arg_spec(:reqd => false, :type => Numeric, :default => 1.0)
     }
     
-    attr_reader :a_number
+    attr_accessor :a_number
     
     def initialize args = {}
       hash_make ARG_SPECS, args
+    end
+    
+    def <=>(other)
+      a_number <=> other.a_number
     end
   end
   
   class MyTestClass
     include HashMakeable
     
+    NON_REQD_FLOAT_DEFAULT = 0.0
+    
     ARG_SPECS = {
       :reqd_string => arg_spec(:reqd => true, :type => String, :validator => ->(a){ a.length < 10 }),
-      :not_reqd_float => arg_spec(:reqd => false, :type => Float, :default => 0.0, :validator => ->(a){ a.between?(0.0,1.0) }),
+      :not_reqd_float => arg_spec(:reqd => false, :type => Float, :default => NON_REQD_FLOAT_DEFAULT, :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_array_of_float => arg_spec_array(:reqd => false, :type => Float,  :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_hash_of_float => arg_spec_hash(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
       :also_hash_makeable => arg_spec(:reqd => false, :type => AlsoHashMakeable, :default => ->(){ AlsoHashMakeable.new }),
     }
     
-    attr_reader :reqd_string, :not_reqd_float, :not_reqd_array_of_float, :not_reqd_hash_of_float, :also_hash_makeable
+    attr_accessor :not_reqd_float
+    attr_reader :reqd_string, :not_reqd_array_of_float, :not_reqd_hash_of_float, :also_hash_makeable
     
     def initialize hashed_args = {}
       hash_make ARG_SPECS, hashed_args
@@ -127,6 +135,42 @@ describe Hashmake::HashMakeable do
         a.also_hash_makeable.a_number.should eq(a_number)
       end
     end
+  end
+  
+  describe '#make_hash' do
+    before :each do
+      @reqd_string = "okeydoke"
+      @obj = MyTestClass.new :reqd_string => @reqd_string, :non_reqd_float => MyTestClass::NON_REQD_FLOAT_DEFAULT
+      @hash = @obj.make_hash
+    end
+    
+    it 'should produce a Hash' do
+      @hash.should be_a Hash
+    end
+    
+    it "should always include req'd values" do
+      @hash.should include(:reqd_string)
+      @hash[:reqd_string].should eq(@reqd_string)
+    end
+    
+    it "should never include non-req'd default values" do
+      @hash.should_not include(:non_reqd_float)
+    end
 
-  end  
+    it "should always include non-req'd non-default values" do
+      @obj.not_reqd_float = 2.0
+      hash = @obj.make_hash
+      hash.should include(:not_reqd_float)
+      hash[:not_reqd_float].should eq(2.0)
+    end
+    
+    it "should turn any hash-makeable objects into Hash objects" do
+      @obj.also_hash_makeable.a_number = 2.0
+      hash = @obj.make_hash
+      hash.should include(:also_hash_makeable)
+      hash[:also_hash_makeable].should be_a Hash
+      hash[:also_hash_makeable].should include(:a_number)
+      hash[:also_hash_makeable][:a_number].should eq(2.0)
+    end
+  end
 end
