@@ -80,6 +80,8 @@ module HashMakeable
     end
   end
   
+  # Check the given value, using the given ArgSpec object. An ArgumentError
+  # exception will be raised if the value is not valid.
   def validate_arg arg_spec, val
     if arg_spec.container == Array
       raise ArgumentError, "val #{val} is not an array" unless val.is_a?(Array)
@@ -200,15 +202,20 @@ module HashMakeable
   # Contains class methods to be added to a class that includes the
   # HashMakeable module.
   module ClassMethods
+    # Helper method to make a generic new ArgSpec object
     def arg_spec args
       ArgSpec.new args
     end
     
+    # Helper method to make a ArgSpec object where the container is an Array.
+    # Set :default to a Proc that generates an empty array.
     def arg_spec_array args
       args = { :container => Array, :default => ->(){Array.new} }.merge(args)
       ArgSpec.new args
     end
 
+    # Helper method to make a ArgSpec object where the container is an Hash.
+    # Set :default to a Proc that generates an empty hash.
     def arg_spec_hash args
       args = { :container => Hash, :default => ->(){Hash.new} }.merge(args)
       ArgSpec.new args

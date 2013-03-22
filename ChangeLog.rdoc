@@ -21,3 +21,14 @@ In hash_make, add support for Hash containers which contain objects of type :typ
 === 0.1.4 / 2013-02-06
 
 Add tests to verify array and hash container support.
+
+=== 0.1.5 / 2013-03-04
+
+Hash arg specs to key name.
+Instead of enumerating containers (e.g CONTAINER_HASH) just use class (Hash).
+Validate args in validate_arg (which could be called independently from hash_make).
+
+=== 0.1.6 / 2013-03-21
+
+Add Hashmake::hash_makeable? for testing if a class includes Hashmake::HashMakeable.
+Add #find_arg_specs and #make_hash methods to HashMakeable.

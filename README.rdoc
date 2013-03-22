@@ -2,13 +2,15 @@
 
 * {Homepage}[https://rubygems.org/gems/hashmake]
 * {Documentation}[http://rubydoc.info/gems/hashmake/frames]
-* {Email}[mailto:jamestunnell at lavabit.com]
+* {Email}[mailto:jamestunnell@lavabit.com]
 
 == Description
 
 Make hash-based object initialization easy!
 
-Provides hash_make method that can consider parameter name, type, default value, validation, requiredd/not, and container type (none/array/hash) according to the specification provided. By default it the value given with the arg key to to an instance variable of same name as parameter.
+Provides hash_make method that can consider parameter name, type, default value, validation, requiredd/not, and container type (none/array/hash) according to the specification provided. The value is assigned to an instance variable matching the arg key.
+
+There is also a make_hash method to turn an object into a representative Hash object. Any hash-makeable sub-objects can be turned into Hash objects as well.
 
 == Features
 
@@ -19,10 +21,10 @@ Provides hash_make method that can consider parameter name, type, default value,
   class MyClass
     include Hashmake::HashMakeable
     
-    ARG_SPECS = [
-      ArgSpec.new(:key => :x, :reqd => true, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
-      ArgSpec.new(:key => :y, :reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }, :default => 0.0),
-    ]
+    ARG_SPECS = {
+      :x => arg_spec(:reqd => true, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
+      :y => arg_spec(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }, :default => 0.0),
+    }
     
     attr_reader :x, :y
     
