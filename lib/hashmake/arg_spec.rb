@@ -22,14 +22,12 @@ class ArgSpec
     :type => Object,
   }
   
-  attr_reader :key, :type, :validator, :reqd, :default, :container
+  attr_reader :type, :validator, :reqd, :default, :container
   
   # A new instance of ArgSpec. 
   # 
-  # @param [Hash] hashed_args Hash to use in initializing an instance. Required
-  #                           keys are :key and :type. Optional keys are :reqd,
-  #                           :validator, :container, and :default.
-  #                           :key => the key used to identify a hashed arg.
+  # @param [Hash] hashed_args Hash to use in initializing an instance. Optional keys
+  #                           are :type, :reqd, :validator, :container, and :default.
   #                           :type => the type of object expected to be paired
   #                                    with the key.
   #                           :reqd => If true, the arg key must be in the hash
@@ -49,7 +47,6 @@ class ArgSpec
   def initialize hashed_args
     new_args = DEFAULT_ARGS.merge(hashed_args)
     
-    @key = new_args[:key]
     @type = new_args[:type]
     raise ArgumentError, "args[:type] #{@type} is not a Class" unless @type.is_a?(Class)
     

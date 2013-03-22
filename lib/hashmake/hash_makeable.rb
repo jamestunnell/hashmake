@@ -153,38 +153,46 @@ module HashMakeable
       raise ArgumentError, "current obj #{self} does not include instance variable #{sym}" if !self.instance_variables.include?(sym)
       val = self.instance_variable_get(sym)
       
-      if val.is_a?(Array)
-        ary = val
-        val = []
-        ary.each do |item|
-          if Hashmake::hash_makeable? item.class
-            val << item.make_hash
-          else
-            val << item
-          end
+      should_assign = false
+
+      if arg_spec.reqd
+        should_assign = true
+      else
+        if arg_spec.default.is_a?(Proc)
+          should_assign = (val != arg_spec.default.call)
+        else
+          should_assign = (val != arg_spec.default)
         end
-      elsif val.is_a?(Hash)
-        hsh = val
-        val = {}
-        hsh.each do |hsh_key,item|
-          if Hashmake::hash_makeable? item.class
-            val[hsh_key] = item.make_hash
-          else
-            val[hsh_key] = item
-          end
-        end
-      elsif Hashmake::hash_makeable?(val.class)
-        val = val.make_hash
       end
       
-      if arg_spec.reqd
-        hash[key] = val
-      elsif arg_spec.default.is_a?(Proc) && val != arg_spec.default.call
-        hash[key] = val
-      elsif val != arg_spec.default
+      if should_assign
+        if val.is_a?(Array) && arg_spec.container == Array
+          ary = val
+          val = []
+          ary.each do |item|
+            if Hashmake::hash_makeable? item.class
+              val << item.make_hash
+            else
+              val << item
+            end
+          end
+        elsif val.is_a?(Hash) && arg_spec.container == Hash
+          hsh = val
+          val = {}
+          hsh.each do |hsh_key,item|
+            if Hashmake::hash_makeable? item.class
+              val[hsh_key] = item.make_hash
+            else
+              val[hsh_key] = item
+            end
+          end
+        elsif Hashmake::hash_makeable?(val.class)
+          val = val.make_hash
+        end
+        
         hash[key] = val
       end
-    end    
+    end
     
     return hash
   end

@@ -175,13 +175,13 @@ describe Hashmake::HashMakeable do
     end
     
     it "should turn an array of hash-makeable objects into an array of Hash objects" do
+      obj2 = MyTestClass.new @obj.make_hash
       @obj.ary_of_also_hash_makeables = [
         AlsoHashMakeable.new(:a_number => 1),
         AlsoHashMakeable.new(:a_number => 2),
         AlsoHashMakeable.new(:a_number => 3),
       ]
       obj2 = MyTestClass.new @obj.make_hash
-      
       obj2.ary_of_also_hash_makeables.count.should be(3)
       obj2.ary_of_also_hash_makeables[0].a_number.should eq(1)
       obj2.ary_of_also_hash_makeables[1].a_number.should eq(2)
