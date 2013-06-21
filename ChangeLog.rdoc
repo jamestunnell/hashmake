@@ -32,3 +32,7 @@ Validate args in validate_arg (which could be called independently from hash_mak
 
 Add Hashmake::hash_makeable? for testing if a class includes Hashmake::HashMakeable.
 Add #find_arg_specs and #make_hash methods to HashMakeable.
+
+=== 0.1.7 / 2013-06-21
+
+In HashMakeable.make_hash, only make objects into hashes if the object class matches the arg spec type (and, still, if it is hash makeable).

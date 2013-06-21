@@ -172,7 +172,7 @@ module HashMakeable
           ary = val
           val = []
           ary.each do |item|
-            if Hashmake::hash_makeable? item.class
+            if Hashmake::hash_makeable?(item.class) and item.class == arg_spec.type
               val << item.make_hash
             else
               val << item
@@ -182,13 +182,13 @@ module HashMakeable
           hsh = val
           val = {}
           hsh.each do |hsh_key,item|
-            if Hashmake::hash_makeable? item.class
+            if Hashmake::hash_makeable? item.class and item.class == arg_spec.type
               val[hsh_key] = item.make_hash
             else
               val[hsh_key] = item
             end
           end
-        elsif Hashmake::hash_makeable?(val.class)
+        elsif Hashmake::hash_makeable?(val.class) and item.class == arg_spec.type
           val = val.make_hash
         end
         
