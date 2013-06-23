@@ -43,6 +43,20 @@ describe Hashmake::HashMakeable do
     end
   end
   
+  class TestAllowNil
+    include HashMakeable
+  
+    ARG_SPECS = {
+      :allows_nil => arg_spec(:reqd => false, :default => ->(){ "123" }, :type => String, :allow_nil => true),
+      :disallows_nil => arg_spec(:reqd => false, :default => ->(){ "123" }, :type => String, :allow_nil => false)
+    }
+    
+    attr_reader :allows_nil, :disallows_nil
+    def initialize args
+      hash_make ARG_SPECS, args
+    end
+  end
+  
   describe '#hash_make' do
     context 'for a reqd arg' do
       it 'should raise an ArgumentError if not given in the hash' do
@@ -136,6 +150,14 @@ describe Hashmake::HashMakeable do
         a.also_hash_makeable.a_number.should eq(a_number)
       end
     end
+    
+    it 'should not raise ArgumentError if nil is given when nil is allowed' do
+      lambda { TestAllowNil.new(:allows_nil => nil) }.should_not raise_error
+    end
+  
+    it 'should raise ArgumentError if nil is given when nil is not allowed' do
+      lambda { TestAllowNil.new(:disallows_nil => nil) }.should raise_error(ArgumentError)
+    end      
   end
   
   describe '#make_hash' do

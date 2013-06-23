@@ -20,9 +20,10 @@ class ArgSpec
     :validator => ->(a){true},
     :container => nil,
     :type => Object,
+    :allow_nil => false
   }
   
-  attr_reader :type, :validator, :reqd, :default, :container
+  attr_reader :type, :validator, :reqd, :default, :container, :allow_nil
   
   # A new instance of ArgSpec. 
   # 
@@ -55,6 +56,8 @@ class ArgSpec
     
     @container = new_args[:container]
     raise ArgumentError, "CONTAINERS does not include container #{@container}" unless CONTAINERS.include?(@container)
+    
+    @allow_nil = new_args[:allow_nil]
     
     unless @reqd
       msg = "if hashed arg is not required, a default value or value generator (proc) must be defined via :default key"

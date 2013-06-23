@@ -36,3 +36,7 @@ Add #find_arg_specs and #make_hash methods to HashMakeable.
 === 0.1.7 / 2013-06-21
 
 In HashMakeable.make_hash, only make objects into hashes if the object class matches the arg spec type (and, still, if it is hash makeable).
+
+=== 0.1.7 / 2013-06-21
+
+Add :allow_nil option to ArgSpec.new. If an arg spec allows nil, it mean that if a hashed arg is nil, no ArgumentError will be raised and the validator won't be called.

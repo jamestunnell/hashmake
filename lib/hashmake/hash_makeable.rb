@@ -86,18 +86,30 @@ module HashMakeable
     if arg_spec.container == Array
       raise ArgumentError, "val #{val} is not an array" unless val.is_a?(Array)
       val.each do |item|
-        raise ArgumentError, "array item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
-        raise ArgumentError, "array item #{item} is not valid" unless arg_spec.validator.call(item)      
+        if item.nil?
+          raise ArgumentError, "nil was given" unless arg_spec.allow_nil
+        else
+          raise ArgumentError, "array item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
+          raise ArgumentError, "array item #{item} is not valid" unless arg_spec.validator.call(item)      
+        end
       end
     elsif arg_spec.container == Hash
       raise ArgumentError, "val #{val} is not a hash" unless val.is_a?(Hash)
       val.values.each do |item|
-        raise ArgumentError, "hash item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
-        raise ArgumentError, "hash item #{item} is not valid" unless arg_spec.validator.call(item)      
+        if item.nil?
+          raise ArgumentError, "nil was given" unless arg_spec.allow_nil
+        else
+          raise ArgumentError, "hash item #{item} is not a #{arg_spec.type}" unless item.is_a?(arg_spec.type)
+          raise ArgumentError, "hash item #{item} is not valid" unless arg_spec.validator.call(item)
+        end
       end
     elsif arg_spec.container.nil?
-      raise ArgumentError, "val #{val} is not a #{arg_spec.type}" unless val.is_a?(arg_spec.type)
-      raise ArgumentError, "val #{val} is not valid" unless arg_spec.validator.call(val)      
+      if val.nil?
+        raise ArgumentError, "nil was given" unless arg_spec.allow_nil
+      else
+        raise ArgumentError, "val #{val} is not a #{arg_spec.type}" unless val.is_a?(arg_spec.type)
+        raise ArgumentError, "val #{val} is not valid" unless arg_spec.validator.call(val)      
+      end
     else
       raise ArgumentError, "arg_spec.container #{arg_spec.container} is not valid"
     end
