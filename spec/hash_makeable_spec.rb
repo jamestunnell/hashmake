@@ -2,25 +2,6 @@ require 'pry'
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe Hashmake::HashMakeable do
-  class AlsoHashMakeable
-    include Comparable
-    include HashMakeable
-    
-    ARG_SPECS = {
-      :a_number => arg_spec(:reqd => false, :type => Numeric, :default => 1.0)
-    }
-    
-    attr_accessor :a_number
-    
-    def initialize args = {}
-      hash_make ARG_SPECS, args
-    end
-    
-    def <=>(other)
-      a_number <=> other.a_number
-    end
-  end
-  
   class MyTestClass
     include HashMakeable
     
@@ -31,29 +12,13 @@ describe Hashmake::HashMakeable do
       :not_reqd_float => arg_spec(:reqd => false, :type => Float, :default => NON_REQD_FLOAT_DEFAULT, :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_array_of_float => arg_spec_array(:reqd => false, :type => Float,  :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_hash_of_float => arg_spec_hash(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
-      :also_hash_makeable => arg_spec(:reqd => false, :type => AlsoHashMakeable, :default => ->(){ AlsoHashMakeable.new }),
-      :ary_of_also_hash_makeables => arg_spec_array(:reqd => false, :type => AlsoHashMakeable)
     }
     
-    attr_accessor :not_reqd_float, :ary_of_also_hash_makeables
-    attr_reader :reqd_string, :not_reqd_array_of_float, :not_reqd_hash_of_float, :also_hash_makeable
+    attr_accessor :not_reqd_float
+    attr_reader :reqd_string, :not_reqd_array_of_float, :not_reqd_hash_of_float
     
     def initialize hashed_args = {}
-      hash_make ARG_SPECS, hashed_args
-    end
-  end
-  
-  class TestAllowNil
-    include HashMakeable
-  
-    ARG_SPECS = {
-      :allows_nil => arg_spec(:reqd => false, :default => ->(){ "123" }, :type => String, :allow_nil => true),
-      :disallows_nil => arg_spec(:reqd => false, :default => ->(){ "123" }, :type => String, :allow_nil => false)
-    }
-    
-    attr_reader :allows_nil, :disallows_nil
-    def initialize args
-      hash_make ARG_SPECS, args
+      hash_make hashed_args, ARG_SPECS
     end
   end
   
@@ -141,73 +106,6 @@ describe Hashmake::HashMakeable do
           a = MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { :a => "", :b => 0.75 }
         end.should raise_error(ArgumentError)
       end
-    end
-    
-    context 'hash-makeable arg' do
-      it 'should construct the hash-makeable arg from just a Hash' do
-        a_number = 5
-        a = MyTestClass.new(:reqd_string => "ok", :also_hash_makeable => { :a_number => a_number })
-        a.also_hash_makeable.a_number.should eq(a_number)
-      end
-    end
-    
-    it 'should not raise ArgumentError if nil is given when nil is allowed' do
-      lambda { TestAllowNil.new(:allows_nil => nil) }.should_not raise_error
-    end
-  
-    it 'should raise ArgumentError if nil is given when nil is not allowed' do
-      lambda { TestAllowNil.new(:disallows_nil => nil) }.should raise_error(ArgumentError)
-    end      
-  end
-  
-  describe '#make_hash' do
-    before :each do
-      @reqd_string = "okeydoke"
-      @obj = MyTestClass.new :reqd_string => @reqd_string, :non_reqd_float => MyTestClass::NON_REQD_FLOAT_DEFAULT
-      @hash = @obj.make_hash
-    end
-    
-    it 'should produce a Hash' do
-      @hash.should be_a Hash
-    end
-    
-    it "should always include req'd values" do
-      @hash.should include(:reqd_string)
-      @hash[:reqd_string].should eq(@reqd_string)
-    end
-    
-    it "should never include non-req'd default values" do
-      @hash.should_not include(:non_reqd_float)
-    end
-
-    it "should always include non-req'd non-default values" do
-      @obj.not_reqd_float = 2.0
-      hash = @obj.make_hash
-      hash.should include(:not_reqd_float)
-      hash[:not_reqd_float].should eq(2.0)
-    end
-    
-    it "should turn any hash-makeable objects into Hash objects" do
-      @obj.also_hash_makeable.a_number = 2.0
-      hash = @obj.make_hash
-      hash.should include(:also_hash_makeable)
-      hash[:also_hash_makeable].should be_a Hash
-      hash[:also_hash_makeable].should include(:a_number)
-      hash[:also_hash_makeable][:a_number].should eq(2.0)
-    end
-    
-    it "should turn an array of hash-makeable objects into an array of Hash objects" do
-      obj2 = MyTestClass.new @obj.make_hash
-      @obj.ary_of_also_hash_makeables = [
-        AlsoHashMakeable.new(:a_number => 1),
-        AlsoHashMakeable.new(:a_number => 2),
-        AlsoHashMakeable.new(:a_number => 3),
-      ]
-      obj2 = MyTestClass.new @obj.make_hash
-      obj2.ary_of_also_hash_makeables.count.should be(3)
-      obj2.ary_of_also_hash_makeables[0].a_number.should eq(1)
-      obj2.ary_of_also_hash_makeables[1].a_number.should eq(2)
-      obj2.ary_of_also_hash_makeables[2].a_number.should eq(3)
     end
   end
 end

@@ -1,3 +1,5 @@
 require 'hashmake/version'
 require 'hashmake/arg_spec'
+require 'hashmake/array_arg_spec'
+require 'hashmake/hash_arg_spec'
 require 'hashmake/hash_makeable'

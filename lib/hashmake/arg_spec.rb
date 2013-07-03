@@ -1,3 +1,6 @@
+require 'set'
+require 'pry'
+
 module Hashmake
 
 # Provides a specification of how a hashed arg is to be processed by the
@@ -7,28 +10,22 @@ module Hashmake
 # 
 class ArgSpec
 
-  # The valid container types. If nil, indicates no container is expected,
-  # just a plain object of type given by :type.
-  CONTAINERS = [ nil, Hash, Array ]
-    
   # Defines default key/value pairs to use in initializing an instance.
   # The :reqd key is set to true by default.
   # The :validator key is set to a Proc that always returns true.
-  # The :container key is set to CONTAINER_NONE.
   DEFAULT_ARGS = {
     :reqd => true,
     :validator => ->(a){true},
-    :container => nil,
     :type => Object,
     :allow_nil => false
   }
   
-  attr_reader :type, :validator, :reqd, :default, :container, :allow_nil
+  attr_reader :type, :validator, :reqd, :default
   
   # A new instance of ArgSpec. 
   # 
   # @param [Hash] hashed_args Hash to use in initializing an instance. Optional keys
-  #                           are :type, :reqd, :validator, :container, and :default.
+  #                           are :type, :reqd, :validator, and :default.
   #                           :type => the type of object expected to be paired
   #                                    with the key.
   #                           :reqd => If true, the arg key must be in the hash
@@ -41,23 +38,14 @@ class ArgSpec
   #                                       expecting it to produce the default.
   #                           :validator => a Proc used to check the validity of
   #                                         whatever value is paired with an arg key.
-  #                           :container => indicates whether the arg key will be paired
-  #                                     with a container (array or hash) which contains
-  #                                     objects of the type specified by :type. Valid values
-  #                                     for this are given by ArgSpec::CONTAINERS.
   def initialize hashed_args
     new_args = DEFAULT_ARGS.merge(hashed_args)
     
     @type = new_args[:type]
-    raise ArgumentError, "args[:type] #{@type} is not a Class" unless @type.is_a?(Class)
+    raise ArgumentError, "#{@type} is not a Class" unless @type.is_a?(Class)
     
     @validator = new_args[:validator]
     @reqd = new_args[:reqd]
-    
-    @container = new_args[:container]
-    raise ArgumentError, "CONTAINERS does not include container #{@container}" unless CONTAINERS.include?(@container)
-    
-    @allow_nil = new_args[:allow_nil]
     
     unless @reqd
       msg = "if hashed arg is not required, a default value or value generator (proc) must be defined via :default key"
@@ -65,6 +53,27 @@ class ArgSpec
       @default = new_args[:default]
     end
   end
-
+    
+  # If the val is not of the right type, but is a Hash, attempt to
+  # make an object of the right type if it is hash-makeable
+  def hash_make_if_needed val
+    if Hashmake.hash_makeable?(@type) and val.is_a?(Hash)
+      val = @type.new val
+    end
+    return val
+  end
+  
+  # Check the given value, and raise ArgumentError it is not valid.
+  def validate_value val
+    raise ArgumentError, "val #{val} is not a #{@type}" unless val.is_a?(@type)
+    raise ArgumentError, "val #{val} is not valid" unless @validator.call(val)
+  end
+  
+  def make_hash_if_possible val
+    if Hashmake::hash_makeable?(val.class) and val.class.is_a?(@type)
+      val = val.make_hash
+    end
+    return val
+  end
 end
 end

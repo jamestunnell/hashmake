@@ -16,22 +16,38 @@ describe Hashmake::ArgSpec do
     
     lambda { Hashmake::ArgSpec.new hash }.should_not raise_error(ArgumentError)
   end
-
-  it 'should not raise ArgumentError if valid container is given' do
-    Hashmake::ArgSpec::CONTAINERS.each do |container|
-      hash = {
-        :reqd => true, :key => :stuff, :type => String, :container => container
-      }
-      
-      lambda { Hashmake::ArgSpec.new hash }.should_not raise_error(ArgumentError)      
-    end
-  end
   
-  it 'should raise ArgumentError if invalid container is given' do
-    hash = {
-      :reqd => true, :key => :stuff, :type => String, :container => Fixnum
-    }
+  context '#validate_value' do
+    before :each do
+      @arg_spec = ArgSpec.new(:reqd => true, :type => Fixnum, :validator => ->(a){ a > 0})
+    end
     
-    lambda { Hashmake::ArgSpec.new hash }.should raise_error(ArgumentError)
+    context 'value given is correct type' do
+      context 'value given is valid' do
+        it 'should not raise ArgumentError' do
+          lambda { @arg_spec.validate_value 1 }.should_not raise_error
+        end
+      end
+      
+      context 'value given is not valid' do
+        it 'should raise ArgumentError' do
+          lambda { @arg_spec.validate_value 0 }.should raise_error(ArgumentError)
+        end
+      end
+    end
+    
+    context 'value given is not correct type' do
+      context 'value given is valid' do
+        it 'should raise ArgumentError' do
+          lambda { @arg_spec.validate_value 1.0 }.should raise_error(ArgumentError)
+        end
+      end
+      
+      context 'value given is not valid' do
+        it 'should raise ArgumentError' do
+          lambda { @arg_spec.validate_value 0.0 }.should raise_error(ArgumentError)
+        end
+      end
+    end
   end
 end
