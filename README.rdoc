@@ -8,11 +8,13 @@
 
 Make hash-based object initialization easy!
 
-Provides hash_make method that can consider parameter name, type, default value, validation, requiredd/not, and container type (none/array/hash) according to the specification provided. The value is assigned to an instance variable matching the arg key.
-
-There is also a make_hash method to turn an object into a representative Hash object. Any hash-makeable sub-objects can be turned into Hash objects as well.
+The hash_make method checks hashed arguments against a set of specifications, then values are assigned to instance variables matching the arg keys.
 
 == Features
+Type checking via Object#is_a?. The default type is Object, allowing anything.
+Mark as required/not. Set to true, by default.
+Default value, for non-required args that aren't given. For default values that are mutable, make the default value a Proc that can be called to generate the mutable value.
+Validation of values via a Proc.
 
 == Examples
 
@@ -24,9 +26,10 @@ There is also a make_hash method to turn an object into a representative Hash ob
     ARG_SPECS = {
       :x => arg_spec(:reqd => true, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
       :y => arg_spec(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }, :default => 0.0),
+      :z => arg_spec_array(:reqd => false, :type => String, :validator => ->(a){ a.size > 0 })
     }
     
-    attr_reader :x, :y
+    attr_reader :x, :y, :z
     
     def initialize hashed_args
       hash_make(ARG_SPECS, hashed_args)
@@ -37,7 +40,10 @@ There is also a make_hash method to turn an object into a representative Hash ob
   a = MyClass.new :x => 0.5, :y => 0.2 # a.x => 0.5, a.y => 0.2
   a = MyClass.new # raise ArgumentError because :x is reqd and not given
   a = MyClass.new :y => 0.5 # raise ArgumentError because :x is reqd and not given
-
+  
+  a = MyClass.new :x => 0.5, :z => ["abc", "efg"] # OK
+  a = MyClass.new :x => 0.5, :z => ["abc", ""] # raise ArgumentError, because validator requires str.size > 0
+  
 == Requirements
 
 == Install

@@ -25,10 +25,9 @@ module HashMakeable
   #                           Nonrequired keys can be given as well, but if they are
   #                           not then a default value is assigned (again, according to
   #                           arg_specs passed in).
-  # @param [Enumerable] arg_specs An enumerable of ArgSpec objects. Each object
-  #                               details an arg key that might be expected in the
-  #                               args hash. The default value will be the output
-  #                               of the find_arg_specs method.
+  # @param [Hash] arg_specs A hash of ArgSpec objects. An ArgSpec object details
+  #                         what to expect from the hashed argument with a
+  #                         matching same key.
   # @param [true/false] assign_args If true, the hashed args will be assigned to
   #                                 instance variables. If false, the hashed args
   #                                 will still be checked, but not assigned.
