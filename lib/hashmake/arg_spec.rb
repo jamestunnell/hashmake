@@ -42,7 +42,13 @@ class ArgSpec
     new_args = DEFAULT_ARGS.merge(hashed_args)
     
     @type = new_args[:type]
-    raise ArgumentError, "#{@type} is not a Class" unless @type.is_a?(Class)
+    if @type.is_a?(Enumerable)
+      @type.each do |type|
+        raise ArgumentError, "#{type} is not a Class" unless type.is_a?(Class)
+      end
+    else
+      raise ArgumentError, "#{@type} is not a Class" unless @type.is_a?(Class)
+    end
     
     @validator = new_args[:validator]
     @reqd = new_args[:reqd]
@@ -53,27 +59,24 @@ class ArgSpec
       @default = new_args[:default]
     end
   end
-    
-  # If the val is not of the right type, but is a Hash, attempt to
-  # make an object of the right type if it is hash-makeable
-  def hash_make_if_needed val
-    if Hashmake.hash_makeable?(@type) and val.is_a?(Hash)
-      val = @type.new val
-    end
-    return val
-  end
   
   # Check the given value, and raise ArgumentError it is not valid.
   def validate_value val
-    raise ArgumentError, "val #{val} is not a #{@type}" unless val.is_a?(@type)
-    raise ArgumentError, "val #{val} is not valid" unless @validator.call(val)
-  end
-  
-  def make_hash_if_possible val
-    if Hashmake::hash_makeable?(val.class) and val.class.is_a?(@type)
-      val = val.make_hash
+    if @type.is_a?(Array)
+      type_matched = false
+      @type.each do |type|
+        if val.is_a? type
+          type_matched = true
+        end
+      end
+      unless type_matched
+        raise ArgumentError, "val #{val} is not one of #{@type}"
+      end
+    else
+      raise ArgumentError, "val #{val} is not a #{@type}" unless val.is_a?(@type)
     end
-    return val
-  end
+
+    raise ArgumentError, "val #{val} is not valid" unless @validator.call(val)
+  end  
 end
 end

@@ -49,3 +49,8 @@ A bit of a major release. mostly to cut back features and modify interfaces a bi
   -add separate classes for container arg specs (array and hash)
   -remove make_hash
   -switch order of arguments for hash_make. Hashed args come first now, and arg spec Hash comes next.
+
+=== 0.2.1 / 2013-08-07
+
+Arg specs can support single or multiple types.
+Removed unused hash_make_if_needed and make_hash_if_possible.

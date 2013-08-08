@@ -12,6 +12,7 @@ describe Hashmake::HashMakeable do
       :not_reqd_float => arg_spec(:reqd => false, :type => Float, :default => NON_REQD_FLOAT_DEFAULT, :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_array_of_float => arg_spec_array(:reqd => false, :type => Float,  :validator => ->(a){ a.between?(0.0,1.0) }),
       :not_reqd_hash_of_float => arg_spec_hash(:reqd => false, :type => Float, :validator => ->(a){ a.between?(0.0,1.0) }),
+      :string_or_class => arg_spec(:reqd => false, :type => [String, Class], :default => "")
     }
     
     attr_accessor :not_reqd_float
@@ -105,6 +106,66 @@ describe Hashmake::HashMakeable do
         lambda do
           a = MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { :a => "", :b => 0.75 }
         end.should raise_error(ArgumentError)
+      end
+
+      it 'should not care (raise error) what the hash keys are' do
+        expect { MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { 0 => 0.5, "abc" => 0.75 } }.not_to raise_error
+        expect { MyTestClass.new :reqd_string => "", :not_reqd_hash_of_float => { Class => 0.5, Hashmake => 0.75 } }.not_to raise_error
+      end
+    end
+
+    context 'multi-type arg' do
+      it 'should not raise error if value is one of the allowed types' do
+        expect { MyTestClass.new(:reqd_string => "", :string_or_class => "Hello") }.not_to raise_error
+        expect { MyTestClass.new(:reqd_string => "", :string_or_class => String) }.not_to raise_error
+      end
+
+      it 'should raise error if value is not one of the allowed types' do
+        expect { MyTestClass.new(:reqd_string => "", :string_or_class => 1.2) }.to raise_error
+      end
+    end
+
+    context 'multi-type array container' do
+      it 'should not raise error if all values are one of the allowed types' do
+        [
+          ["String"],
+          ["String", String],
+          [String, Float, "Fixnum"],
+        ].each do |good_values|
+          expect { MyTestClass.new(:reqd_string => "", :strings_or_classes => good_values) }.not_to raise_error
+        end
+      end
+
+      it 'should raise error if any of the values is not one of the allowed types' do
+        [
+          [1.2],
+          ["String", 1.2, String],
+          [String, 1.2, "Fixnum"],
+        ].each do |good_values|
+          expect { MyTestClass.new(:reqd_string => "", :strings_or_classes => good_values) }.not_to raise_error
+        end
+      end
+    end
+
+    context 'multi-type hash container' do
+      it 'should not raise error if all values are one of the allowed types' do
+        [
+          [0 => "String"],
+          [0 => "String", 1 => String],
+          [0 => String, 1 => Float, 2 => "Fixnum"],
+        ].each do |good_values|
+          expect { MyTestClass.new(:reqd_string => "", :strings_or_classes => good_values) }.not_to raise_error
+        end
+      end
+
+      it 'should raise error if any of the values is not one of the allowed types' do
+        [
+          [0 => 1.2],
+          [0 => "String", 1 => 1.2, 2 => String],
+          [0 => String, 1 => 1.2, 2 => "Fixnum"],
+        ].each do |good_values|
+          expect { MyTestClass.new(:reqd_string => "", :strings_or_classes => good_values) }.not_to raise_error
+        end
       end
     end
   end

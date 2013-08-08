@@ -26,24 +26,11 @@ class ArrayArgSpec
     @arg_spec.default
   end
   
-  def hash_make_if_needed val
-    val.each_index do |i|
-      item = val[i]
-      val[i] = @arg_spec.hash_make_if_needed item
-    end
-  end
-  
   def validate_value val
     val.each do |item|
       @arg_spec.validate_value item
     end
-  end
-  
-  def make_hash_if_possible ary
-    ary.each_index do |i|
-      ary[i] = @arg_spec.make_hash_if_possible ary[i]
-    end
-  end
+  end  
 end
 
 end

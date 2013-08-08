@@ -11,7 +11,7 @@ Make hash-based object initialization easy!
 The hash_make method checks hashed arguments against a set of specifications, then values are assigned to instance variables matching the arg keys.
 
 == Features
-Type checking via Object#is_a?. The default type is Object, allowing anything.
+Type checking via Object#is_a?. The default type is Object, allowing anything. Can allow multiple types.
 Mark as required/not. Set to true, by default.
 Default value, for non-required args that aren't given. For default values that are mutable, make the default value a Proc that can be called to generate the mutable value.
 Validation of values via a Proc.
@@ -44,6 +44,18 @@ Validation of values via a Proc.
   a = MyClass.new :x => 0.5, :z => ["abc", "efg"] # OK
   a = MyClass.new :x => 0.5, :z => ["abc", ""] # raise ArgumentError, because validator requires str.size > 0
   
+  class MultitypeDemo
+    include Hashmake::HashMakeable
+
+    ARG_SPECS = {
+      :str_or_class => arg_spec(:reqd => true, :type => [String, Class])
+    }
+  end
+
+  MultitypeDemo.new(:str_or_class => "")  # OK
+  MultitypeDemo.new(:str_or_class => String)  # OK
+  MultitypeDemo.new(:str_or_class => 1)  # raise ArgumentError
+
 == Requirements
 
 == Install
